@@ -1,0 +1,3 @@
+pyspark==3.2.3
+python-dotenv==1.0.0
+vertica-python==1.3.5
