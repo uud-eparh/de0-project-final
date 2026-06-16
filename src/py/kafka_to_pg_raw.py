@@ -21,15 +21,15 @@ logger.info("Запуск Spark Streaming: Kafka -> PostgreSQL (raw)")
 KAFKA_HOST = os.getenv('KAFKA_HOST', 'rc1b-2erh7b35n4j4v869.mdb.yandexcloud.net')
 KAFKA_PORT = os.getenv('KAFKA_PORT', '9091')
 KAFKA_TOPIC = os.getenv('KAFKA_TOPIC', 'uud-eparh_transaction-service-input')
-KAFKA_USER = os.getenv('KAFKA_USER', 'de-student')
-KAFKA_PASSWORD = os.getenv('KAFKA_PASSWORD', 'ltcneltyn')
+KAFKA_USER = os.getenv('KAFKA_USER', '...')
+KAFKA_PASSWORD = os.getenv('KAFKA_PASSWORD', '...')
 CA_CERT_PATH = os.getenv('CA_CERT_PATH', '/data/CA.pem')
 
 PG_HOST = os.getenv('PG_HOST', 'host.docker.internal')
 PG_PORT = os.getenv('PG_PORT', '15432')
 PG_DB = os.getenv('PG_DB', 'postgres')
-PG_USER = os.getenv('PG_USER', 'jovyan')
-PG_PASSWORD = os.getenv('PG_PASSWORD', 'jovyan')
+PG_USER = os.getenv('PG_USER', '...')
+PG_PASSWORD = os.getenv('PG_PASSWORD', '...')
 
 PG_URL = f"jdbc:postgresql://{PG_HOST}:{PG_PORT}/{PG_DB}"
 PG_PROPERTIES = {
