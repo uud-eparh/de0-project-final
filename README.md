@@ -14,17 +14,6 @@
 
 ---
 
-## 🔗 Ссылка на итоговую витрину
-
-``` text
-Схема: VT260312E5C416__DWH
-Таблица: global_metrics
-Хост: vertica.data-engineer.education-services.ru
-Порт: 5433
-БД: dwh
-```
----
-
 ## 🏗️ Архитектура пайплайна
 
                     ┌───────────────┐     ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
@@ -69,11 +58,11 @@
 
 | Компонент | Назначение | Технология | Подключение |
 |-----------|------------|-------------|-------------|
-| PostgreSQL RAW | Хранение сырых JSON из Kafka | PostgreSQL (схема `raw`) | `localhost:15432` |
-| Vertica STAGING | Очищенные данные с типами | Vertica (схема `VT260312E5C416__STAGING`) | `vertica.data-engineer.education-services.ru:5433` |
-| **Vertica DWH** | **Витрина global_metrics** | **Vertica (схема `VT260312E5C416__DWH`)** | **`vertica.data-engineer.education-services.ru:5433`** |
-| S3 | Пакетные CSV-файлы | Yandex Object Storage | `storage.yandexcloud.net/final-project` |
-| Kafka | Потоковая передача транзакций и курсов | Yandex Managed Kafka | `rc1b-2erh7b35n4j4v869.mdb.yandexcloud.net:9091` |
+| PostgreSQL RAW | Хранение сырых JSON из Kafka | PostgreSQL (схема `raw`) | `` |
+| Vertica STAGING | Очищенные данные с типами | Vertica (схема `VT260312E5C416__STAGING`) | `` |
+| **Vertica DWH** | **Витрина global_metrics** | **Vertica (схема `VT260312E5C416__DWH`)** | **``** |
+| S3 | Пакетные CSV-файлы | Yandex Object Storage | `` |
+| Kafka | Потоковая передача транзакций и курсов | Yandex Managed Kafka | `` |
 
 ---
 
@@ -102,28 +91,29 @@
 ---
 
 ## 🔧 Переменные окружения (.env)
-``` text
-VERTICA_HOST=vertica.data-engineer.education-services.ru
+
+```ini
+VERTICA_HOST=<vertica-host>
 VERTICA_PORT=5433
 VERTICA_DB=dwh
-VERTICA_USER=vt260312e5c416
-VERTICA_PASSWORD=...
-STAGING_SCHEMA=VT260312E5C416__STAGING
-DWH_SCHEMA=VT260312E5C416__DWH
-KAFKA_HOST=rc1b-2erh7b35n4j4v869.mdb.yandexcloud.net
+VERTICA_USER=<username>
+VERTICA_PASSWORD=<password>
+STAGING_SCHEMA=<username>__STAGING
+DWH_SCHEMA=<username>__DWH
+KAFKA_HOST=<kafka-host>
 KAFKA_PORT=9091
-KAFKA_USER=de-student
-KAFKA_PASSWORD=...
-KAFKA_TOPIC=uud-eparh_transaction-service-input
+KAFKA_USER=<kafka-user>
+KAFKA_PASSWORD=<kafka-password>
+KAFKA_TOPIC=<topic-name>
 PG_HOST=host.docker.internal
 PG_PORT=15432
 PG_DB=postgres
-PG_USER=jovyan
-PG_PASSWORD=...
+PG_USER=<pg-user>
+PG_PASSWORD=<pg-password>
 S3_BUCKET=final-project
 S3_ENDPOINT=https://storage.yandexcloud.net
-S3_ACCESS_KEY=...
-S3_SECRET_KEY=...
+S3_ACCESS_KEY=<s3-access-key>
+S3_SECRET_KEY=<s3-secret-key>
 ```
 ---
 
@@ -159,27 +149,34 @@ docker cp CA.pem de-final-prj-local:/data/CA.pem
 
 | Conn Id | Type | Параметры |
 |---------|------|-----------|
-| `vertica_dwh` | Vertica | host: vertica.data-engineer.education-services.ru, port: 5433, schema: dwh |
+| `vertica_dwh` | Vertica | host: vertica.data-engineer., port: 5433, schema: dwh |
 | `postgres_raw` | Postgres | host: host.docker.internal, port: 15432, schema: postgres |
-| `s3_final_project` | Amazon Web Services | AWS Key + Extra: {"endpoint_url": "https://storage.yandexcloud.net"} |
+| `s3_final_project` | Amazon Web Services | AWS Key + Extra: {"endpoint_url": "https://storage."} |
 
 **Variables (Admin → Variables):**
 
 | Key | Value |
 |-----|-------|
-| `staging_schema` | `VT260312E5C416__STAGING` |
-| `dwh_schema` | `VT260312E5C416__DWH` |
+| `staging_schema` | `__STAGING` |
+| `dwh_schema` | `__DWH` |
 | `s3_bucket` | `final-project` |
 | `batch_size` | `500` |
 
 ### 5. Проверка Kafka
 ``` shell
-docker run -it --network=host -v "C:\Users\User\.redis\CA.pem:/data/CA.pem" edenhill/kcat:1.7.1 -b rc1b-2erh7b35n4j4v869.mdb.yandexcloud.net:9091 -t uud-eparh_transaction-service-input -X security.protocol=SASL_SSL -X sasl.mechanisms=SCRAM-SHA-512 -X sasl.username=de-student -X sasl.password="ltcneltyn" -X ssl.ca.location=/data/CA.pem -L
+kafkacat -b <kafka-host>:9091 \
+  -X security.protocol=SASL_SSL \
+  -X sasl.mechanisms=SCRAM-SHA-512 \
+  -X sasl.username=<user> \
+  -X sasl.password=<password> \
+  -X ssl.ca.location=/data/CA.pem \
+  -t <topic> -L
 ```
 ### 6. Запуск Spark Streaming (Kafka → PostgreSQL)
 ``` shell
 docker cp src/py/kafka_to_pg_raw.py de-final-prj-local:/root/
-docker exec -it -e KAFKA_HOST=... -e PG_HOST=host.docker.internal de-final-prj-local spark-submit /root/kafka_to_pg_raw.py
+docker exec -it -e KAFKA_HOST=... -e PG_HOST=host.docker.internal \
+  de-final-prj-local spark-submit /root/kafka_to_pg_raw.py
 ```
 ### 7. Запуск Airflow DAG'ов
 
